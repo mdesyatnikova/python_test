@@ -1,6 +1,8 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.webdriver import WebDriver
 
+from model.group import Group
+
 
 class GroupHelper:
     def __init__(self, app):
@@ -40,15 +42,23 @@ class GroupHelper:
             wd.find_element(By.NAME, fild_name).send_keys(text)
 
     def delete_first_group(self):
+        self.delete_group_by_index(0)
+
+    def delete_group_by_index(self, index):
         wd = self.app.wd
         self.open_groups_page()
-        self.select_first_group()
+        self.select_group(index)
         wd.find_element(By.NAME, "delete").click()
         self.return_to_groups_page()
+
 
     def select_first_group(self):
         wd = self.app.wd
         wd.find_element(By.NAME, "selected[]").click()
+
+    def select_group(self, index):
+        wd = self.app.wd
+        wd.find_elements(By.NAME, "selected[]")[index].click()
 
     def edit_first_group(self, new_group_data):
         wd = self.app.wd
@@ -63,3 +73,13 @@ class GroupHelper:
         wd = self.app.wd
         self.open_groups_page()
         return len(wd.find_elements(By.NAME, "selected[]"))
+
+    def get_group_list(self):
+        wd = self.app.wd
+        self.open_groups_page()
+        group_list =[]
+        for element in wd.find_elements(By.CSS_SELECTOR, "span.group"):
+            text = element.text
+            id_ = element.find_element(By.NAME, "selected[]").get_attribute("value")
+            group_list.append(Group(name=text, id=id_))
+        return group_list
